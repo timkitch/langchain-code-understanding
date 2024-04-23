@@ -5,8 +5,6 @@ from langchain_text_splitters import Language
 
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
-import openai
-
 import re, os
 
 from langchain_chroma import Chroma
@@ -15,22 +13,44 @@ from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
 
-from langchain.chains import RetrievalQA
-from langchain_community.vectorstores import Chroma
-from langchain_openai import OpenAI, OpenAIEmbeddings
-from langchain_text_splitters import CharacterTextSplitter
+from langchain_anthropic import ChatAnthropic
 
+from langchain_community.vectorstores import Chroma
+from langchain_openai import OpenAIEmbeddings
 
 from dotenv import load_dotenv
 load_dotenv()
 
-llm = ChatOpenAI(model="gpt-4")
+# llm = ChatOpenAI(model="gpt-4")
+
+llm = ChatAnthropic(
+            model="claude-3-haiku-20240307", temperature=0.0
+        )
 
 # Clone
 repo_path = "./repos"
-# repo = Repo.clone_from("https://github.com/timkitch/confluence_rag_app.git", to_path=repo_path)
+if not os.path.exists(repo_path):
+    os.makedirs(repo_path)
 
 def clone_repo(remote_repo_url):
+    """
+    Clones a remote Git repository to a local path.
+    
+    Args:
+        remote_repo_url (str): The URL of the remote Git repository to clone.
+    
+    Returns:
+        str: The local path where the repository was cloned.
+    """
+    """
+    Clones a remote Git repository to a local path.
+    
+    Args:
+        remote_repo_url (str): The URL of the remote Git repository to clone.
+    
+    Returns:
+        str: The local path where the repository was cloned.
+    """
     # Use a regular expression to extract the last part of the URL path
     match = re.search(r"([^/]+)\.git$", remote_repo_url)
     if match:
@@ -38,8 +58,6 @@ def clone_repo(remote_repo_url):
     else:
         print("Could not extract repo name from URL")
         exit(1)
-
-    print(repo_name)
     
     local_repo_path = repo_path + "/" + repo_name
     
@@ -53,6 +71,15 @@ def clone_repo(remote_repo_url):
     return local_repo_path
         
 def load_repo(repo_path):
+    """
+    Loads a repository from the file system and returns the documents.
+    
+    Args:
+        repo_path (str): The path to the repository on the file system.
+    
+    Returns:
+        List[Document]: A list of documents loaded from the repository.
+    """
     loader = GenericLoader.from_filesystem(
         repo_path,
         glob="**/*",
@@ -65,6 +92,15 @@ def load_repo(repo_path):
     return documents
 
 def split_documents(documents):
+    """
+    Splits the given documents into smaller text chunks with a specified chunk size and overlap.
+    
+    Args:
+        documents (List[str]): A list of text documents to be split.
+    
+    Returns:
+        List[str]: A list of text chunks split from the input documents.
+    """
     text_splitter = RecursiveCharacterTextSplitter(
         chunk_size=2000, chunk_overlap=300
     )
@@ -72,6 +108,15 @@ def split_documents(documents):
     return texts
 
 def create_db_and_retriever(texts):
+    """
+    Creates a Chroma database and retriever from the given text documents.
+    
+    Args:
+        texts (List[str]): A list of text documents to create the database and retriever from.
+    
+    Returns:
+        Retriever: A Chroma retriever that can be used to search the database of text documents.
+    """
     # OpenAI embeddings
     embeddings = OpenAIEmbeddings()
     db = Chroma.from_documents(texts, embeddings)
@@ -82,6 +127,21 @@ def create_db_and_retriever(texts):
     return retriever
 
 def create_qa_chain(retriever):
+    """
+    Creates a question-answering (QA) chain that uses a retriever to find relevant context, and a language model to generate answers based on that context.
+    
+    The QA chain is composed of two sub-chains:
+    1. A retriever chain that generates a search query based on the user's input and the conversation history.
+    2. A document chain that generates an answer based on the retrieved context.
+    
+    The retriever chain uses a prompt that includes the conversation history and the user's input to generate a search query. The document chain uses a prompt that includes the retrieved context and the user's input to generate the answer.
+    
+    Args:
+        retriever (Retriever): The retriever to use for finding relevant context.
+    
+    Returns:
+        A QA chain that can be used to answer questions.
+    """
     prompt = ChatPromptTemplate.from_messages(
         [
             ("placeholder", "{chat_history}"),
