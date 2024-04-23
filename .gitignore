@@ -1,0 +1,18 @@
+#ignore this in github
+
+# environment variables
+.env
+
+#Cache folders
+__pycache__/
+
+# VS Code
+.vscode/
+*.code-workspace
+
+secrets.txt
+
+# repos folder, where the app pulls down git repos for processing
+repos/
+
+myenv/
