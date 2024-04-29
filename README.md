@@ -82,7 +82,9 @@ The available colors are:
 The `getDefault()` method returns the default color, which is White.
 
 Rate the response (1-5): 5
+
 (Optional) Enter any comments for feedback: That's a perfect response!
+
 Enter a question or task (or 'x' to exit): 
 
 ## Langsmith Traces
