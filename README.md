@@ -1,4 +1,4 @@
-# Langchain and Langsmith Code Example
+# README for Langchain and Langsmith Code Example
 
 This repository contains a Python script that integrates various Langchain and Langsmith tools to provide a robust question-answering system based on dynamic content retrieval from a specified Git repository. The code showcases how to clone a repository, parse documents, split texts, create a searchable database, and build a question-answering chain using different language models.
 
