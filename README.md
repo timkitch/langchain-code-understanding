@@ -34,12 +34,18 @@ This repository contains a Python script that integrates various Langchain and L
 
 
 ## Command Line Interaction Example
-(myenv) (base) timkitch@DESKTOP-9B877UH:~/ai-projects/langchain-code-understanding$ python cu.py 
+(myenv) (base) timkitch@DESKTOP-9B877UH:~/ai-projects/langchain-code-understanding$ python cu.py
+
 Enter repo URL: https://github.com/timkitch/blckly-api.git
+
 Local repo path already exists. Not cloning.
+
 User ID: 8aaf0682-9b3b-4773-ad51-3bd523dbf65d
+
 Enter a question or task (or 'x' to exit): What car kit colors does this app allow me to choose when placing an order?
+
 Langsmith run id: 7c86220f-74cb-40ed-b300-161269fd6bb6
+
 Answer: Based on the code provided, the available car kit colors that the user can choose from are defined in the `Color` enum:
 
 ```java
@@ -80,6 +86,10 @@ Rate the response (1-5): 5
 Enter a question or task (or 'x' to exit): 
 
 ## Langsmith Traces
-Below shows the Langsmith trace for the above question.
+The below screenshot shows the Langsmith trace for the above question/answer chain execution.
 
 ![Langsmith](langsmith.png)
+
+This Langsmith screenshot shows the rating and comments provided by the user.
+
+![Langsmith](langsmith-ratings.png)
