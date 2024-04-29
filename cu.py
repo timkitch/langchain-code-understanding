@@ -15,17 +15,36 @@ from langchain_openai import ChatOpenAI
 
 from langchain_anthropic import ChatAnthropic
 
+from langchain_groq import ChatGroq
+
 from langchain_community.vectorstores import Chroma
 from langchain_openai import OpenAIEmbeddings
+
+from langchain_core.output_parsers import StrOutputParser
+from langchain.callbacks.tracers.langchain import wait_for_all_tracers
+from langchain.callbacks.tracers import LangChainTracer
+from langchain.callbacks.manager import collect_runs
+from langsmith import Client
+
+import uuid
 
 from dotenv import load_dotenv
 load_dotenv()
 
+client = Client()
+
+tracer = LangChainTracer(client)
+
+output_parser = StrOutputParser()
+
 # llm = ChatOpenAI(model="gpt-4")
 
-llm = ChatAnthropic(
-            model="claude-3-haiku-20240307", temperature=0.0
-        )
+llm = ChatAnthropic(model="claude-3-haiku-20240307", temperature=0.0)
+
+# llm = ChatGroq(temperature=0, model_name="mixtral-8x7b-32768")
+# llm = ChatGroq(temperature=0, model_name="llama3-8b-8192")
+# llm = ChatGroq(temperature=0, model_name="llama3-70b-8192")
+
 
 # Clone
 repo_path = "./repos"
@@ -33,15 +52,6 @@ if not os.path.exists(repo_path):
     os.makedirs(repo_path)
 
 def clone_repo(remote_repo_url):
-    """
-    Clones a remote Git repository to a local path.
-    
-    Args:
-        remote_repo_url (str): The URL of the remote Git repository to clone.
-    
-    Returns:
-        str: The local path where the repository was cloned.
-    """
     """
     Clones a remote Git repository to a local path.
     
@@ -83,9 +93,10 @@ def load_repo(repo_path):
     loader = GenericLoader.from_filesystem(
         repo_path,
         glob="**/*",
-        suffixes=[".java"],
-        exclude=["**/non-utf8-encoding.py"],
+        suffixes=[".java", ".py", ".go", ".c", ".cpp", ".h", ".cs", ".php", ".js"],
+        # exclude=["**/non-utf8-encoding.py"],
         parser=LanguageParser(parser_threshold=500),
+        # NOTE: the parser may perform better for certain languages if the language is specified.
         # parser=LanguageParser(language=Language.PYTHON, parser_threshold=500),
     )
     documents = loader.load()
@@ -121,8 +132,8 @@ def create_db_and_retriever(texts):
     embeddings = OpenAIEmbeddings()
     db = Chroma.from_documents(texts, embeddings)
     retriever = db.as_retriever(
-        search_type="mmr",  # Also test "similarity"
-        search_kwargs={"k": 8},
+        search_type="mmr",  # use maximal marginal relevance to rank search results
+        search_kwargs={"k": 20},
         )
     return retriever
 
@@ -167,9 +178,9 @@ def create_qa_chain(retriever):
     )
     document_chain = create_stuff_documents_chain(llm, prompt)
 
-    qa = create_retrieval_chain(retriever_chain, document_chain)
+    qa_chain = create_retrieval_chain(retriever_chain, document_chain)
     
-    return qa
+    return qa_chain
 
 remote_repo_url = input("Enter repo URL: ")
 repo_path = clone_repo(remote_repo_url)
@@ -177,10 +188,46 @@ repo_path = clone_repo(remote_repo_url)
 documents = load_repo(repo_path)
 texts = split_documents(documents)
 retriever = create_db_and_retriever(texts)
-qa = create_qa_chain(retriever)
+qa_chain = create_qa_chain(retriever)
 
-while True:
-    question = input("Question: ")
-    result = qa.invoke({"input": question})
-    print("Answer:", result["answer"] + "\n")
+# Simulate user. For Langsmith tracing only.
+user_id = str(uuid.uuid4())
+print(f"User ID: {user_id}")
+        
+stop = False
+while not stop:
+    
+    try:
+        question = input("Enter a question or task (or 'x' to exit): ")
+        if (question == "x"):
+            stop = True
+            continue
+    
+        with collect_runs() as runs_cb:
+            response = qa_chain.invoke({"input": question},
+                        config = {"tags": ["project-type", "code-understanding"],
+                        "metadata": {"user_id": user_id},
+                        "run_name": "code-understanding-chain"
+                        }
+                        #  config= {"callbacks": [tracer]}
+                    )
+            
+            print("Langsmith run id:", runs_cb.traced_runs[0].id)
+            
+            print("Answer:", response["answer"] + "\n")
+            
+            # Ratings could be any scale: 1-5, thumbs-up/down (1 or 0), number of stars, range of emojis... just have to translate to number or boolean.
+            user_rating = int(input("Rate the response (1-5): "))
+            user_comments = input("(Optional) Enter any comments for feedback: ")
+            
+            client.create_feedback(
+                run_id=runs_cb.traced_runs[0].id,
+                key="user-rating",
+                score=user_rating,
+                comment=user_comments
+        )
+    finally:
+        wait_for_all_tracers()
+    
+    
 
