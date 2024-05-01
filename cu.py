@@ -153,7 +153,7 @@ def create_qa_chain(retriever):
     Returns:
         A QA chain that can be used to answer questions.
     """
-    prompt = ChatPromptTemplate.from_messages(
+    history_prompt = ChatPromptTemplate.from_messages(
         [
             ("placeholder", "{chat_history}"),
             ("user", "{input}"),
@@ -164,9 +164,9 @@ def create_qa_chain(retriever):
         ]
     )
 
-    retriever_chain = create_history_aware_retriever(llm, retriever, prompt)
+    retriever_chain = create_history_aware_retriever(llm, retriever, history_prompt)
 
-    prompt = ChatPromptTemplate.from_messages(
+    current_prompt = ChatPromptTemplate.from_messages(
         [
             (
                 "system",
@@ -176,7 +176,7 @@ def create_qa_chain(retriever):
             ("user", "{input}"),
         ]
     )
-    document_chain = create_stuff_documents_chain(llm, prompt)
+    document_chain = create_stuff_documents_chain(llm, current_prompt)
 
     qa_chain = create_retrieval_chain(retriever_chain, document_chain)
     
