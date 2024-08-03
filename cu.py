@@ -29,7 +29,9 @@ from langsmith import Client
 import uuid
 
 from dotenv import load_dotenv
-load_dotenv()
+load_dotenv(override=True)
+
+print(os.environ["LANGCHAIN_API_KEY"])
 
 client = Client()
 
@@ -39,7 +41,8 @@ output_parser = StrOutputParser()
 
 # llm = ChatOpenAI(model="gpt-4")
 
-llm = ChatAnthropic(model="claude-3-haiku-20240307", temperature=0.0)
+llm = ChatAnthropic(model="claude-3-5-sonnet-20240620", temperature=0.0)
+# llm = ChatAnthropic(model="claude-3-haiku-20240307", temperature=0.0)
 
 # llm = ChatGroq(temperature=0, model_name="mixtral-8x7b-32768")
 # llm = ChatGroq(temperature=0, model_name="llama3-8b-8192")
