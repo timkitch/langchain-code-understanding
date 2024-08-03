@@ -30,7 +30,7 @@ repo_path = clone_repo(remote_repo_url, branch)
 documents = load_repo(repo_path)
 texts = split_documents(documents)
 retriever = create_db_and_retriever(texts)
-qa_chain = create_qa_chain(retriever)
+qa_chain = create_qa_chain(llm, retriever)
 
 # Simulate user. For Langsmith tracing only.
 user_id = str(uuid.uuid4())
