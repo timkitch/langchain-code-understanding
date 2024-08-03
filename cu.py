@@ -54,12 +54,13 @@ repo_path = "./repos"
 if not os.path.exists(repo_path):
     os.makedirs(repo_path)
 
-def clone_repo(remote_repo_url):
+def clone_repo(remote_repo_url, branch=None):
     """
     Clones a remote Git repository to a local path.
     
     Args:
         remote_repo_url (str): The URL of the remote Git repository to clone.
+        branch (str, optional): The specific branch to clone. If None, clones the default branch.
     
     Returns:
         str: The local path where the repository was cloned.
@@ -79,7 +80,11 @@ def clone_repo(remote_repo_url):
         print("Local repo path already exists. Not cloning.")
     else:
         print(f"Cloning repo {remote_repo_url} to {local_repo_path}...")
-        Repo.clone_from(remote_repo_url, to_path=local_repo_path)
+        if branch:
+            print(f"Cloning branch: {branch}")
+            Repo.clone_from(remote_repo_url, to_path=local_repo_path, branch=branch, depth=1)
+        else:
+            Repo.clone_from(remote_repo_url, to_path=local_repo_path)
         
     return local_repo_path
         
@@ -186,7 +191,8 @@ def create_qa_chain(retriever):
     return qa_chain
 
 remote_repo_url = input("Enter repo URL: ")
-repo_path = clone_repo(remote_repo_url)
+branch = input("Enter branch name (press Enter for default branch): ").strip() or None
+repo_path = clone_repo(remote_repo_url, branch)
 
 documents = load_repo(repo_path)
 texts = split_documents(documents)
