@@ -17,11 +17,6 @@ import os
 
 print(os.environ["LANGCHAIN_API_KEY"])
 
-# Set the Anthropic API key
-os.environ["ANTHROPIC_API_KEY"] = os.getenv("ANTHROPIC_API_KEY")
-if not os.environ["ANTHROPIC_API_KEY"]:
-    raise ValueError("ANTHROPIC_API_KEY is not set in the environment variables")
-
 client = Client()
 
 tracer = LangChainTracer(client)
