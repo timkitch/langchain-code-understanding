@@ -15,4 +15,5 @@ secrets.txt
 # repos folder, where the app pulls down git repos for processing
 repos/
 
-myenv/
+lc-code-u/
+.aider*
