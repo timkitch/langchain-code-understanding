@@ -70,6 +70,4 @@ while not stop:
         )
     finally:
         wait_for_all_tracers()
-    
-    
 
