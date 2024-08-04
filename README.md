@@ -24,7 +24,10 @@ This repository contains a Python script that integrates various Langchain and L
 ## Usage
 
 1. **Start the Script**:
-   Run the script by executing `python cu.py` on the commande line. Enter the URL of the Git repository you want to chat with when prompted. The script will handle the cloning and loading processes.
+   Run the script by executing `python cu.py` on the command line. You will be prompted to:
+   - Enter the URL of the Git repository you want to chat with.
+   - Optionally specify a branch name (press Enter for the default branch).
+   The script will handle the cloning and loading processes based on your input.
 
 2. **Question-Answering**:
    Once the system is ready, you can start asking questions. The system will use the created QA chain to retrieve relevant information and provide answers.
@@ -37,6 +40,7 @@ This repository contains a Python script that integrates various Langchain and L
 (myenv) (base) timkitch@DESKTOP-9B877UH:~/ai-projects/langchain-code-understanding$ python cu.py
 
 Enter repo URL: https://github.com/timkitch/blckly-api.git
+Enter branch name (press Enter for default branch): 
 
 Local repo path already exists. Not cloning.
 
