@@ -12,6 +12,8 @@ import uuid
 from dotenv import load_dotenv
 load_dotenv(override=True)
 
+import datetime
+
 print(os.environ["LANGCHAIN_API_KEY"])
 
 client = Client()
@@ -30,11 +32,28 @@ retriever = create_db_and_retriever(texts)
 qa_chain = create_qa_chain(retriever)
 
 
+def get_save_preference():
+    while True:
+        save_chat = input("Do you want to save this chat to a file? (yes/no): ").lower()
+        if save_chat in ['yes', 'no']:
+            return save_chat == 'yes'
+        print("Please enter 'yes' or 'no'.")
+
 def main():
     # Simulate user. For Langsmith tracing only.
     user_id = str(uuid.uuid4())
     print(f"User ID: {user_id}")
-            
+    
+    save_chat = get_save_preference()
+    chat_file = None
+    
+    if save_chat:
+        filename = input("Enter a filename to save the chat: ")
+        timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        full_filename = f"{filename}-{timestamp}.txt"
+        chat_file = open(full_filename, 'w')
+        print(f"Chat will be saved to: {full_filename}")
+    
     stop = False
     while not stop:
         
@@ -55,7 +74,12 @@ def main():
                 
                 print("Langsmith run id:", runs_cb.traced_runs[0].id)
                 
-                print("Answer:", response["answer"] + "\n")
+                answer = response["answer"]
+                print("Answer:", answer + "\n")
+                
+                if chat_file:
+                    chat_file.write(f"Question: {question}\n")
+                    chat_file.write(f"Answer: {answer}\n\n")
                 
                 # Ratings could be any scale: 1-5, thumbs-up/down (1 or 0), number of stars, range of emojis... just have to translate to number or boolean.
                 user_rating = int(input("Rate the response (1-5): "))
@@ -69,9 +93,11 @@ def main():
             )
         finally:
             wait_for_all_tracers()
+    
+    if chat_file:
+        chat_file.close()
+        print(f"Chat saved to {full_filename}")
 
 if __name__ == "__main__":
     main()
-    
-    
 
