@@ -27,13 +27,18 @@ This repository contains a Python script that integrates various Langchain and L
    Run the script by executing `python cu.py` on the command line. You will be prompted to:
    - Enter the URL of the Git repository you want to chat with.
    - Optionally specify a branch name (press Enter for the default branch).
+   - Choose whether to save the chat session to a file.
+   - If saving, provide a filename for the chat log.
    The script will handle the cloning and loading processes based on your input.
 
 2. **Question-Answering**:
-   Once the system is ready, you can start asking questions. The system will use the created QA chain to retrieve relevant information and provide answers.
+   Once the system is ready, you can start asking questions. The system will use the created QA chain to retrieve relevant information and provide answers. If you chose to save the chat, all questions and answers will be logged to the specified file.
 
 3. **Feedback Loop**:
    After receiving each answer, you can rate the response and provide comments for feedback. This is crucial for improving the system's accuracy and user experience.
+
+4. **Session Saving**:
+   If you chose to save the chat session, the script will automatically append each question and answer to the specified file. At the end of the session, it will confirm that the chat has been saved and provide the full filename.
 
 
 ## Command Line Interaction Example
@@ -44,6 +49,10 @@ Enter repo URL: https://github.com/timkitch/blckly-api.git
 Enter branch name (press Enter for default branch): 
 
 Local repo path already exists. Not cloning.
+
+Do you want to save this chat to a file? (yes/no): yes
+Enter a filename to save the chat: example_chat
+Chat will be saved to: example_chat_2024-08-03_21-15-30.txt
 
 User ID: 8aaf0682-9b3b-4773-ad51-3bd523dbf65d
 
@@ -90,7 +99,9 @@ Rate the response (1-5): 5
 
 (Optional) Enter any comments for feedback: That's a perfect response!
 
-Enter a question or task (or 'x' to exit): 
+Enter a question or task (or 'x' to exit): x
+
+Chat saved to example_chat_2024-08-03_21-15-30.txt
 
 ## Langsmith Traces
 The below screenshot shows the Langsmith trace for the above question/answer chain execution.
