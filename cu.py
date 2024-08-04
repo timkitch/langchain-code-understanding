@@ -50,8 +50,8 @@ def main():
     
     if save_chat:
         filename = input("Enter a filename to save the chat: ")
-        timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        full_filename = f"{filename}-{timestamp}.txt"
+        timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        full_filename = f"{filename}_{timestamp}.txt"
         chat_file = open(full_filename, 'w')
         print(f"Chat will be saved to: {full_filename}")
     
