@@ -63,3 +63,44 @@ def load_repo(repo_path):
     )
     documents = loader.load()
     return documents
+
+
+
+def generate_project_structure(root_dir):
+    """
+    Generates the project structure including directories, filenames with paths, class names, and function names.
+    
+    Args:
+        root_dir (str): The root directory of the project.
+    
+    Returns:
+        dict: A dictionary containing the project structure.
+    """
+    project_structure = {
+        "directories": [],
+        "files": {},
+        "all_files": [],
+    }
+    
+    for dirpath, dirnames, filenames in os.walk(root_dir):
+        project_structure["directories"].append(dirpath)
+        for filename in filenames:
+            file_path = os.path.join(dirpath, filename)
+            project_structure["all_files"].append(file_path)
+            if filename.endswith(".py"):
+                with open(file_path, "r") as file:
+                    content = file.read()
+                    classes = re.findall(r"^class\s+(\w+)", content, re.MULTILINE)
+                    functions = re.findall(r"^def\s+(\w+)", content, re.MULTILINE)
+                    project_structure["files"][file_path] = {
+                        "classes": classes,
+                        "functions": functions,
+                    }
+    
+    return project_structure
+
+# Example usage
+if __name__ == "__main__":
+    root_directory = "./repos/hydra"  # Set this to your project's root directory
+    structure = generate_project_structure(root_directory)
+    print(structure)

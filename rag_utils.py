@@ -37,6 +37,7 @@ def split_documents(documents):
         chunk_size=2000, chunk_overlap=300
     )
     texts = text_splitter.split_documents(documents)
+    print("Number of items in texts:", len(texts))
     return texts
 
 def create_db_and_retriever(texts):
@@ -52,6 +53,7 @@ def create_db_and_retriever(texts):
     # OpenAI embeddings
     embeddings = OpenAIEmbeddings()
     db = Chroma.from_documents(texts, embeddings)
+    print("Chroma DB initialized with", len(texts), "texts")
     retriever = db.as_retriever(
         search_type="mmr",  # use maximal marginal relevance to rank search results
         search_kwargs={"k": 20},
@@ -91,7 +93,7 @@ def create_qa_chain(retriever):
         [
             (
                 "system",
-                "Answer the user's questions based on the below context:\n\n{context}",
+                "Answer the user's questions based on the below context:\n\n{context}\n\nProject structure:\n\n{project_structure}",
             ),
             ("placeholder", "{chat_history}"),
             ("user", "{input}"),

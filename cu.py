@@ -1,5 +1,5 @@
 from rag_utils import create_db_and_retriever, create_qa_chain, split_documents
-from repo_utils import clone_repo, load_repo
+from repo_utils import clone_repo, load_repo, generate_project_structure
 import os
 from langchain_core.output_parsers import StrOutputParser
 from langchain.callbacks.tracers.langchain import wait_for_all_tracers
@@ -25,10 +25,19 @@ output_parser = StrOutputParser()
 
 remote_repo_url = input("Enter repo URL: ")
 branch = input("Enter branch name (press Enter for default branch): ").strip() or None
+# Clone the repository and get the path
 repo_path = clone_repo(remote_repo_url, branch)
 
+# Generate the project structure
+project_structure = generate_project_structure(repo_path)
+
+# Load the repository documents
 documents = load_repo(repo_path)
+
+# Split the documents, passing the project structure if needed
 texts = split_documents(documents)
+
+# Create the retriever and QA chain
 retriever = create_db_and_retriever(texts)
 qa_chain = create_qa_chain(retriever)
 
@@ -65,13 +74,16 @@ def main():
                 continue
         
             with collect_runs() as runs_cb:
-                response = qa_chain.invoke({"input": question},
-                            config = {"tags": ["project-type", "code-understanding"],
-                            "metadata": {"user_id": user_id},
-                            "run_name": "code-understanding-chain"
-                            }
-                            #  config= {"callbacks": [tracer]}
-                        )
+                response = qa_chain.invoke(
+                    {"input": question,
+                     "project_structure": project_structure
+                    },
+                    config = {"tags": ["project-type", "code-understanding"],
+                    "metadata": {"user_id": user_id},
+                    "run_name": "code-understanding-chain"
+                    }
+                    #  config= {"callbacks": [tracer]}
+                )
                 
                 print("Langsmith run id:", runs_cb.traced_runs[0].id)
                 
@@ -81,6 +93,7 @@ def main():
                 if chat_file:
                     chat_file.write(f"Question: {question}\n")
                     chat_file.write(f"Answer: {answer}\n\n")
+                    chat_file.flush()
                 
                 # Ratings could be any scale: 1-5, thumbs-up/down (1 or 0), number of stars, range of emojis... just have to translate to number or boolean.
                 user_rating = int(input("Rate the response (1-5): "))
