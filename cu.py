@@ -34,12 +34,16 @@ project_structure = generate_project_structure(repo_path)
 # Load the repository documents
 documents = load_repo(repo_path)
 
-# Split the documents, passing the project structure if needed
-texts = split_documents(documents)
+# check document size. if no documents, then print error message and don't call split_documents. Just stop
+if len(documents) == 0:
+    print('\033[91mNo documents found in the repository. Please add some documents or update the file "suffix" value list in the "load_repo" function and try again.\033[0m')
+else:
+    # Split the documents, passing the project structure if needed
+    texts = split_documents(documents)
 
-# Create the retriever and QA chain
-retriever = create_db_and_retriever(texts)
-qa_chain = create_qa_chain(retriever)
+    # Create the retriever and QA chain
+    retriever = create_db_and_retriever(texts)
+    qa_chain = create_qa_chain(retriever)
 
 
 def get_save_preference():
