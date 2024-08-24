@@ -1,5 +1,6 @@
 from rag_utils import create_db_and_retriever, create_qa_chain, split_documents
-from repo_utils import clone_repo, load_repo, generate_project_structure
+from repo_utils import clone_repo, load_repo
+from project_structure_generator import generate_project_structure
 import os
 from langchain_core.output_parsers import StrOutputParser
 from langchain.callbacks.tracers.langchain import wait_for_all_tracers
@@ -29,7 +30,7 @@ branch = input("Enter branch name (press Enter for default branch): ").strip() o
 repo_path = clone_repo(remote_repo_url, branch)
 
 # Generate the project structure
-project_structure = generate_project_structure(repo_path)
+project_structure = generate_project_structure(repo_path, exclusion_file="./exclusions", include=["files"])
 
 # Load the repository documents
 documents = load_repo(repo_path)
