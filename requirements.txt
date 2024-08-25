@@ -4,6 +4,11 @@ langchain-chroma==0.1.0
 langchain==0.1.16
 langsmith
 langchainhub
-langchain_anthropic>=^0.1
+langchain_anthropic>=0.1
 langchain-groq
 GitPython==3.1.43
+esprima
+torch
+transformers
+tree-sitter==0.21.3
+tree-sitter-languages==1.10.2

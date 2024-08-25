@@ -20,7 +20,7 @@ llm = ChatAnthropic(model="claude-3-5-sonnet-20240620", temperature=0.0)
 # llm = ChatGroq(temperature=0, model_name="llama3-70b-8192")
 
 # Debug: Print the Anthropic API key to verify it's loaded correctly
-print("Anthropic API Key:", os.getenv("ANTHROPIC_API_KEY"))
+# print("Anthropic API Key:", os.getenv("ANTHROPIC_API_KEY"))
 
 
 def split_documents(documents):
@@ -34,7 +34,7 @@ def split_documents(documents):
         List[str]: A list of text chunks split from the input documents.
     """
     text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=2000, chunk_overlap=300
+        chunk_size=2000, chunk_overlap=50
     )
     texts = text_splitter.split_documents(documents)
     print("Number of items in texts:", len(texts))
@@ -56,7 +56,7 @@ def create_db_and_retriever(texts):
     print("Chroma DB initialized with", len(texts), "texts")
     retriever = db.as_retriever(
         search_type="mmr",  # use maximal marginal relevance to rank search results
-        search_kwargs={"k": 20},
+        search_kwargs={"k": 10},
         )
     return retriever
 
@@ -104,4 +104,3 @@ def create_qa_chain(retriever):
     qa_chain = create_retrieval_chain(retriever_chain, document_chain)
     
     return qa_chain
-

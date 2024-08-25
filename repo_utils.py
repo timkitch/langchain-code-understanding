@@ -3,12 +3,16 @@ import re
 from git import Repo
 from langchain_community.document_loaders.generic import GenericLoader
 from langchain_community.document_loaders.parsers import LanguageParser
+from transformers import GPT2Tokenizer
 
 repo_path = "./repos"
 if not os.path.exists(repo_path):
     os.makedirs(repo_path)
 
-def clone_repo(remote_repo_url, branch=None):
+def clone_repo(
+    remote_repo_url, 
+    branch=None
+    ):
     """
     Clones a remote Git repository to a local path.
     
@@ -55,7 +59,7 @@ def load_repo(repo_path):
     loader = GenericLoader.from_filesystem(
         repo_path,
         glob="**/*",
-        suffixes=[".java", ".py", ".go", ".c", ".cpp", ".h", ".cs", ".php", ".js"],
+        suffixes=[".java", ".py", ".go", ".c", ".cpp", ".h", ".cs", ".php", ".js", ".yml", ".yaml", ".sh"],
         # exclude=["**/non-utf8-encoding.py"],
         parser=LanguageParser(parser_threshold=500),
         # NOTE: the parser may perform better for certain languages if the language is specified.
@@ -96,6 +100,15 @@ def generate_project_structure(root_dir):
                         "classes": classes,
                         "functions": functions,
                     }
+                    
+    # Print the size of the project_structure dictionary
+    print(f"Size of project_structure: {len(project_structure)}")
+    
+    # Estimate the number of tokens
+    tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
+    project_structure_str = str(project_structure)
+    tokens = tokenizer.encode(project_structure_str)
+    print(f"Estimated number of tokens: {len(tokens)}")
     
     return project_structure
 

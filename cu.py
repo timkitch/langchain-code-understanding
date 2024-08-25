@@ -7,6 +7,8 @@ from langchain.callbacks.tracers.langchain import wait_for_all_tracers
 from langchain.callbacks.tracers import LangChainTracer
 from langchain.callbacks.manager import collect_runs
 from langsmith import Client
+import json
+
 
 import uuid
 
@@ -31,6 +33,12 @@ repo_path = clone_repo(remote_repo_url, branch)
 
 # Generate the project structure
 project_structure = generate_project_structure(repo_path, exclusion_file="./exclusions", include=["files"])
+
+structure_file_name = "project_structure.json"  # Changed extension to .json
+with open(structure_file_name, 'w') as file:
+    json.dump(project_structure, file, indent=4)  # Use json.dump to write the dictionary as JSON
+
+print(f"Project structure has been written to {structure_file_name}")
 
 # Load the repository documents
 documents = load_repo(repo_path)
@@ -65,7 +73,7 @@ def main():
     if save_chat:
         filename = input("Enter a filename to save the chat: ")
         timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        full_filename = f"{filename}_{timestamp}.txt"
+        full_filename = f"{filename}_{timestamp}.md"
         chat_file = open(full_filename, 'w')
         print(f"Chat will be saved to: {full_filename}")
     
