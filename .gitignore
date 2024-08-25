@@ -17,3 +17,6 @@ repos/
 
 lc-code-u/
 .aider*
+
+venv/
+analysis/
